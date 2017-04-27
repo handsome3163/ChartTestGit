@@ -5,10 +5,12 @@
 var endpoint = '/api/chart/data'
 var Labels = []
 var Defaults = []
-//var ctx = document.getElementById("myChart");
-//var ctx2 = document.getElementById("myChart2");
-var ctx = document.getElementById("myChart").getContext("2d");
 
+
+
+var m = 0;
+var w =0;
+var ctx = document.getElementById("myChart");
 var myChart = new Chart(ctx, {
     type: 'line',
     options: {
@@ -18,36 +20,34 @@ var myChart = new Chart(ctx, {
 
                      onComplete: function(animation) {
                        var sourceCanvas = myChart.chart.canvas;
-                       var copyWidth = myChart.scales['y-axis-0'].width - 10;
-                       var copyHeight = myChart.scales['y-axis-0'].height + myChart.scales['y-axis-0'].top + 10;
+                       var copyWidth = myChart.scales['y-axis-0'].width;
+                       var copyHeight = myChart.scales['y-axis-0'].height + myChart.scales['y-axis-0'].top;
                          var targetCtx = document.getElementById("myChartAxis").getContext("2d");
                          targetCtx.canvas.width = copyWidth;
-                 targetCtx.drawImage(sourceCanvas, 0, 0, copyWidth, copyHeight, 0, 0, copyWidth, copyHeight);
+                 targetCtx.drawImage(sourceCanvas, copyWidth, copyHeight, copyWidth, copyHeight);
                      }
-                 }
+                 },
+          scales: {
+            yAxes: [
+              {type:"linear","id":"y-axis-0",display:true, position:"right"},
+
+            ]
+          }
        },
     data: {
-        labels: [Labels],
+        labels: [],
         datasets: [{
-            label: '# of Votes',
-            data: Defaults,
-            backgroundColor: [],
-            borderColor: [],
+            label: 'Channel 1',
+            data: [],
+            backgroundColor: ['rgba(255, 99, 132, 0.2)'],
+            borderColor: ['rgba(255, 99, 132, 1)'],
             borderWidth: 1
 
         }]
     },
-    // options: {
-    //     scales: {
-    //         yAxes: [{
-    //             ticks: {
-    //                 beginAtZero:true
-    //             }
-    //         }]
-    //     }
-    // }
 });
 
+//var ctx2 = document.getElementById("myChart2");
 // var myChart = new Chart(ctx, {
 //     type: 'polarArea',
 //     data: {
@@ -72,6 +72,7 @@ var myChart = new Chart(ctx, {
 // });
 
 function refresh() {
+
       $.ajax({
           method: "GET",
           url:endpoint,
@@ -80,11 +81,9 @@ function refresh() {
             Defaults = data.defaults
             setChart()
             console.log(data)
-            //console.log(data.sales)
           },
           error:function(data){
             console.log("error")
-            console.log(error_data)
           }
 
     });
@@ -92,49 +91,19 @@ function refresh() {
 }
 
 
-var myVar;
+
+
 
 function myFunction() {
-    myVar = setInterval(refresh, 3000);
+   setInterval(refresh, 6000);
 }
 
-function alertFunc() {
-  alert("Hello!");
-}
 
 myFunction()
 
 
 // Pushes only the latest elements, by comparing Thier primary keys
 function setChart(){
-/*
-  var newDataset = {
-          labels: Labels,
-          datasets: [{
-              label: '# of Votes',
-              data: Defaults,
-              backgroundColor: [
-                  'rgba(255, 99, 132, 0.2)',
-                  'rgba(54, 162, 235, 0.2)',
-                  'rgba(255, 206, 86, 0.2)',
-                  'rgba(75, 192, 192, 0.2)',
-                  'rgba(153, 102, 255, 0.2)',
-                  'rgba(255, 159, 64, 0.2)'
-              ],
-              borderColor: [
-                  'rgba(255,99,132,1)',
-                  'rgba(54, 162, 235, 1)',
-                  'rgba(255, 206, 86, 1)',
-                  'rgba(75, 192, 192, 1)',
-                  'rgba(153, 102, 255, 1)',
-                  'rgba(255, 159, 64, 1)'
-              ],
-              borderWidth: 1
-          }]
-  };
-  //myChart2.data.push(newDataset)
-  //myChart2.data.datasets.data.push(Defaults)*/
-
 
   Pusher(myChart)
   //Pusher(myChart);
@@ -142,37 +111,26 @@ function setChart(){
 }
 
 function Pusher(self) {
-console.log(Defaults);
-console.log(Labels);
+
 
 Defaults =  Defaults.map(Number)
 
-console.log(Defaults);
-console.log(Labels);
-
 for (i=0; i< Defaults.length; ++i) {
-  myChart.data.datasets[0].data.push(Defaults[i]);
-	myChart.data.labels.push(Defaults[i]);
+  self.data.datasets[0].data.push(Defaults[i]); // Behind by one !!
+  self.data.labels.push(Defaults[i]);
+
 }
 Defaults = [];
 labels = [];
-  // self.data.labels =Labels; //defined locally -> must be solved
-  // self.data.datasets[0].data = Defaults;
-  // self.data.datasets[0].backgroundColor = 'rgba(255, 99, 132, 0.2)'
-  // self.data.datasets[0].borderColor = 'rgba(255, 99, 132, 1)'
+
   self.update();
 
-  var newwidth = $('.chartAreaWrapper2').width() +60;
+  var newwidth = $('.chartAreaWrapper2').width()+60;
   $('.chartAreaWrapper2').width(newwidth);
    $('.chartAreaWrapper').animate({scrollLeft:newwidth});
 }
 
-/*
-//myChart2.datasets.push(newDataset);
-myChart2.data.labels[6] ="2018"; //defined locally -> must be solved
-myChart2.data.datasets[0].data[6] = 200;
-myChart2.update();
-*/
+
 {% endblock %}
 
 
@@ -181,23 +139,18 @@ myChart2.update();
 {% block content %}
 
 <div class='row'>
-    <div class='col-sm-12'>
-        <h1>Hello World</h1>
+    <div class='col-sm'>
+        <h1>ECoG1</h1>
         <div class="chartWrapper">
-      <div class="chartAreaWrapper">
-        <div class="chartAreaWrapper2">
-            <canvas id="myChart"></canvas>
-        </div>
-      </div>
+            <div class="chartAreaWrapper">
+              <div class="chartAreaWrapper2">
+                  <canvas id="myChart"></canvas>
+              </div>
+            </div>
 
-        <canvas id="myChartAxis" height="300" width="0"></canvas>
-    </div>
-        <!-- <div class="col-sm-6">
-          <canvas id="myChart" width="400" height="400"></canvas>
+            <canvas id="myChartAxis" height="300px" width="0"></canvas>
         </div>
-        <div class="col-sm-6">
-          <canvas id="myChart2" width="400" height="400"></canvas>
-        </div> -->
+
     </div>
 </div>
 
