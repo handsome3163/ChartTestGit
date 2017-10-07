@@ -1,5 +1,5 @@
 print "Populating Earth with BLE..."
-#hh
+#test
 import datetime
 
 from django.db import models
